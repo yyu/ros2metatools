@@ -7,7 +7,8 @@
 
 ## [cmd] choco install VisualStudio
 
-    choco install visualstudio2017-installer
+    choco install -y VisualStudio2017Community
+    choco install -y visualstudio2017-workload-vctools
 
 ## [cmd] choco install cygwin
 
@@ -51,9 +52,9 @@
     pip install -U pytest coverage mock
     pip install -U flake8 flake8-blind-except flake8-builtins flake8-class-newline flake8-comprehensions flake8-deprecated flake8-docstrings flake8-import-order flake8-quotes pep8 pydocstyle
 
-## [GUI] PATH prepend
+## [cmd] PATH prepend
 
-    C:\Program Files\OpenSSL-Win64\bin;c:\opencv\x64\vc15\bin;C:\Program Files\CMake\bin;C:\ProgramData\chocolatey\lib\tinyxml2\lib;C:\Program Files\Git\cmd;C:\Program Files\Cppcheck;
+    setx Path "C:\Program Files\OpenSSL-Win64\bin;c:\opencv\x64\vc15\bin;C:\Program Files\CMake\bin;C:\ProgramData\chocolatey\lib\tinyxml2\lib;C:\Program Files\Git\cmd;C:\Program Files\Cppcheck;%Path%" /M
 
 ## [cmd] env variables
 
@@ -75,4 +76,33 @@
     echo > C:\dev\ros2\src\ros2\rviz\AMENT_IGNORE
     cd C:\dev\ros2
     colcon build --merge-install
+
+## [cmd,GUI] File Explorer Options
+
+[ref](https://superuser.com/questions/744123/opening-folder-options-window-in-windows-from-the-command-prompt)
+
+### method 1
+
+    C:\Windows\System32\rundll32.exe shell32.dll,Options_RunDLL 7
+
+### method 2
+
+    control folders
+
+then click "View" tab
+
+### change some options
+
+    Files and Folders
+        ☒Display the full path in the title bar
+        Hidden files and folders
+            ◉Show hiddenfiles, folders, and drives
+        ◻︎Hide empty drives
+        ◻︎Hide extensions for known file types
+        ◻︎Hide folder merge conflicts
+        ◻︎Hide protected operating system files
+    Navigation pane
+        ☒Expand to open folder
+        ☒Show all folders
+        ☒Show libraries
 
