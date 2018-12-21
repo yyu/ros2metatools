@@ -135,8 +135,6 @@ Make sure VisualStudio has the components installed.
     ./configure-aprutil.bat
     ./configure.bat
 
-    ln -s /usr/bin/sed .
-
     sed -i "/#include <vector>/ a #include<iterator>" ../log4cxx/src/main/cpp/stringhelper.cpp
     sed -i "/namespace log4cxx/ i #define DELETED_CTORS(T) T(const T&) = delete; T& operator=(const T&) = delete;\n\n#define DEFAULTED_AND_DELETED_CTORS(T) T() = default; T(const T&) = delete; T& operator=(const T&) = delete;\n" ../log4cxx/src/main/include/log4cxx/helpers/objectimpl.h
     sed -i "/END_LOG4CXX_CAST_MAP()/ a \  DEFAULTED_AND_DELETED_CTORS(PatternConverter)" ../log4cxx/src/main/include/log4cxx/pattern/patternconverter.h
