@@ -116,13 +116,15 @@ Make sure VisualStudio has the components installed.
 
 ## log4cxx as an example
 
+### fetch code and apply patches
+
     wget http://archive.apache.org/dist/apr/apr-1.5.2-win32-src.zip
     wget http://archive.apache.org/dist/apr/apr-util-1.5.4-win32-src.zip
     wget https://archive.apache.org/dist/logging/log4cxx/0.10.0/apache-log4cxx-0.10.0.zip
 
-    unzip apr-1.5.2-win32-src.zip
-    unzip apr-util-1.5.4-win32-src.zip
-    unzip apache-log4cxx-0.10.0.zip
+    unzip apr-1.5.2-win32-src.zip > /dev/null 2>&1
+    unzip apr-util-1.5.4-win32-src.zip > /dev/null 2>&1
+    unzip apache-log4cxx-0.10.0.zip > /dev/null 2>&1
 
     mkdir ap
     mv apr-1.5.2 ap/apr
@@ -144,9 +146,58 @@ Make sure VisualStudio has the components installed.
     sed -i "/virtual ~Layout();/ i \                DEFAULTED_AND_DELETED_CTORS(Layout)" ../log4cxx/src/main/include/log4cxx/Layout.h
     sed -i -e "s/defined(_MSC_VER) \&\&/defined(_MSC_VER) \&\& _MSC_VER < 1600 \&\&/" ../log4cxx/src/main/include/log4cxx/log4cxx.h
 
-retarget
+### build in VisualStudio
 
-rpcrt4.lib
+#### open log4cxx.dsw
 
-right click log4cxx > build
+![](01-log4cxx.dsw.png)
+![](02-oneway_upgrade.png)
+![](03-MigratingSolution.png)
+![](04-VSready.png)
+
+
+#### set the right platform
+
+Right-click solution, then click "Configuration Manager..."
+
+![](05-ConfigurationManager.png)
+![](06-ConfigurationManager0.png)
+![](07-ConfigurationManager1.png)
+![](08-ConfigurationManager2.png)
+![](09-ConfigurationManager3.png)
+![](10-ConfigurationManager4.png)
+![](11-ConfigurationManager5.png)
+![](12-ConfigurationManager6.png)
+![](13-ConfigurationManager7.png)
+![](14-ConfigurationManager_DONE.png)
+
+#### retarget solution
+
+Right-click solution, then click "Retarget solution..."
+
+![](15-RetargetSolution.png)
+![](16-RetargetProjects.png)
+![](17-RetargetProjects_DONE.png)
+
+#### additional lib
+
+Additional Dependency rpcrt4.lib
+
+![](18-log4cxx_Properties.png)
+![](19-AdditionalDeps.png)
+![](20-AdditionalDeps_rpcrt4.lib.png)
+![](21-AdditionalDeps_DONE.png)
+
+#### build
+
+Right-click log4cxx, then click build
+
+![](22-log4cxx_Build.png)
+![](23-log4cxx_Build1.png)
+![](24-log4cxx_Build2.png)
+![](25-log4cxx_Build3.png)
+![](26-log4cxx_Build4.png)
+![](27-log4cxx_Build5.png)
+![](28-log4cxx_Build_DONE.png)
+
 
