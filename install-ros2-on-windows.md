@@ -5,25 +5,26 @@
 
     @"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
 
+## [cmd] choco install chrome
+
+if you need a browser
+
+    choco install -y GoogleChrome
+
 ## [cmd] choco install VisualStudio
 
     choco install -y VisualStudio2017Community
     choco install -y visualstudio2017-workload-vctools
 
-## [cmd] choco install cygwin
+## [cmd] choco install msys2
 
-    choco install Cygwin
+    choco install msys2
 
-### [GUI] cygwin install wget
+## [msys2] pacman install
 
-    C:\tools\cygwin\cygwinsetup.exe
+    pacman -S msys/unzip
 
-## [cygwin] install apt-cyg
-
-    wget https://raw.githubusercontent.com/transcode-open/apt-cyg/master/apt-cyg
-    install apt-cyg /bin
-
-## [cygwin] downloads
+## [msys2] downloads
 
     cat > wget-list << "EOF"
     https://raw.githubusercontent.com/transcode-open/apt-cyg/master/apt-cyg
@@ -36,14 +37,14 @@
     EOF
 
     wget --input-file=wget-list
-    mv opencv-3.4.1-vc15.VS2017.zip /cygdrive/c/Users/Administrator/Downloads/  # needs to be extracted as C:\opencv
-    chmod +x Win64OpenSSL-1_1_1a.exe
+    unzip opencv-3.4.1-vc15.VS2017.zip
+    mv opencv /c/  # use File Explorer if it doesn't work
     ./Win64OpenSSL-1_1_1a.exe
 
 ## [cmd] choco install ROS2 dependencies
 
     choco install -y python cmake git patch curl cppcheck
-    choco install -y -s C:\tools\cygwin\home\Administrator asio eigen tinyxml-usestl tinyxml2
+    choco install -y -s C:\tools\msys64\home\Administrator asio eigen tinyxml-usestl tinyxml2
 
 ## [cmd] pip install
 
@@ -54,7 +55,7 @@
 
 ## [cmd] PATH prepend
 
-    setx Path "C:\Program Files\OpenSSL-Win64\bin;c:\opencv\x64\vc15\bin;C:\Program Files\CMake\bin;C:\ProgramData\chocolatey\lib\tinyxml2\lib;C:\Program Files\Git\cmd;C:\Program Files\Cppcheck;%Path%" /M
+    setx Path "C:\Program Files\OpenSSL-Win64\bin;c:\opencv\x64\vc15\bin;C:\Program Files\CMake\bin;C:\ProgramData\chocolatey\lib\tinyxml2\lib;C:\Program Files\Git\cmd;C:\Program Files\Cppcheck;C:\tools\msys64\usr\bin;%Path%" /M
 
 ## [cmd] env variables
 
@@ -94,15 +95,72 @@ then click "View" tab
 ### change some options
 
     Files and Folders
-        ☒Display the full path in the title bar
+        [X] Display the full path in the title bar
         Hidden files and folders
-            ◉Show hiddenfiles, folders, and drives
-        ◻︎Hide empty drives
-        ◻︎Hide extensions for known file types
-        ◻︎Hide folder merge conflicts
-        ◻︎Hide protected operating system files
+            (*) Show hiddenfiles, folders, and drives
+        [ ] Hide empty drives
+        [ ] Hide extensions for known file types
+        [ ] Hide folder merge conflicts
+        [ ] Hide protected operating system files
     Navigation pane
-        ☒Expand to open folder
-        ☒Show all folders
-        ☒Show libraries
+        [X] Expand to open folder
+        [X] Show all folders
+        [X] Show libraries
+
+
+# build a package
+
+Make sure VisualStudio has the components installed.
+
+![](vs2017.png)
+
+## log4cxx as an example
+
+    wget http://archive.apache.org/dist/apr/apr-1.5.2-win32-src.zip
+    wget http://archive.apache.org/dist/apr/apr-util-1.5.4-win32-src.zip
+    wget https://archive.apache.org/dist/logging/log4cxx/0.10.0/apache-log4cxx-0.10.0.zip
+
+    unzip apr-1.5.2-win32-src.zip
+    unzip apr-util-1.5.4-win32-src.zip
+    unzip apache-log4cxx-0.10.0.zip
+
+    mkdir ap
+    mv apr-1.5.2 ap/apr
+    mv apr-util-1.5.4 ap/apr-util
+    mv apache-log4cxx-0.10.0 ap/log4cxx
+
+    cd ap/log4cxx
+    ./configure-aprutil.bat
+    ./configure.bat
+
+    ln -s /usr/bin/sed .
+
+    cat > patch.bat << "EOF"
+    ECHO OFF
+    ECHO "Start patching log4cxx"
+    sed -i "/#include <vector>/ a #include<iterator>" ..\log4cxx\src\main\cpp\stringhelper.cpp
+    IF DEFINED APPVEYOR (
+      sed -i "/namespace log4cxx/ i #define DELETED_CTORS(T) T(const T&) = delete; T& operator=(const T&) = delete;\n\n#define DEFAULTED_AND_DELETED_CTORS(T) T() = default; T(const T&) = delete; T& operator=(const T&) = delete;\n" ..\log4cxx\src\main\include\log4cxx\helpers\objectimpl.h
+    ) ELSE (
+      sed -i "/namespace log4cxx/ i #define DELETED_CTORS(T) T(const T&) = delete; T& operator=(const T&) = delete;\n\n#define DEFAULTED_AND_DELETED_CTORS(T) T() = default; T(const T&) = delete; T& operator=(const T&) = delete;\n" ..\log4cxx\src\main\include\log4cxx\helpers\objectimpl.h
+    )
+    sed -i "/END_LOG4CXX_CAST_MAP()/ a \  DEFAULTED_AND_DELETED_CTORS(PatternConverter)" ..\log4cxx\src\main\include\log4cxx\pattern\patternconverter.h
+    sed -i "/virtual ~RollingPolicyBase();/ i \          DELETED_CTORS(RollingPolicyBase)" ..\log4cxx\src\main\include\log4cxx\rolling\RollingPolicyBase.h
+    sed -i "/virtual ~TriggeringPolicy();/ i \             DEFAULTED_AND_DELETED_CTORS(TriggeringPolicy)" ..\log4cxx\src\main\include\log4cxx\rolling\TriggeringPolicy.h
+    sed -i "/Filter();/ a \                        DELETED_CTORS(Filter)" ..\log4cxx\src\main\include\log4cxx\spi\Filter.h
+    sed -i "/virtual ~Layout();/ i \                DEFAULTED_AND_DELETED_CTORS(Layout)" ..\log4cxx\src\main\include\log4cxx\Layout.h
+    sed -i -e "s/defined(_MSC_VER) \&\&/defined(_MSC_VER) \&\& _MSC_VER < 1600 \&\&/" ..\log4cxx\src\main\include\log4cxx\log4cxx.h
+    REM removing temporary files created by sed
+    DEL sed*
+    ECHO "Patching done"
+    EOF
+
+    ./patch.bat
+
+    
+retarget
+
+rpcrt4.lib
+
+right click log4cxx > build
 
