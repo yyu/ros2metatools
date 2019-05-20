@@ -23,6 +23,7 @@ if you need a browser
 ## [msys2] pacman install
 
     pacman -S msys/unzip
+    pacman -S msys/vim
 
 ## [msys2] downloads
 
